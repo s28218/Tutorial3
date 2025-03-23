@@ -97,3 +97,87 @@ public class Gas : Container, IHazardExc
     public void Hazard(string message) => Console.WriteLine($"[Hazard Alert] {message}");
 }
 
+public class Refrigirator : Container
+{
+    public string ProductType { get; private set; }
+    public double Temperature { get; private set; }
+
+    private static readonly Dictionary<string, double> ProductTemp = new()
+    {
+        { "Bananas", 13.3 },
+        { "Chocolate", 18 },
+        { "Fish", 2 },
+        { "Meat", -15 },
+        { "Ice cream", -18 },
+        { "Frozen pizza", -30 },
+        { "Cheese", 7.2 },
+        { "Sausages", 5 },
+        { "Butter", 20.5 },
+        { "Eggs", 19 }
+    };
+
+    public Refrigirator(double depth, double height, double maxPayload, double tare, string product, double temp)
+        : base(depth, height, maxPayload, "C", tare)
+    {
+        ProductType = product;
+        Temperature = temp;
+
+        if (!ProductTemp.ContainsKey(ProductType))
+            throw new ArgumentException($"Wrong product: {ProductType}");
+
+        if (Temperature < ProductTemp[ProductType])
+            throw new ArgumentException($"Low temp for {ProductType}. Need: {ProductTemp[ProductType]}°C");
+    }
+
+    public class Ship
+    {
+        public string ShipName { get; private set; }
+        public double MaxSpeed { get; private set; }
+        public int MaxContainers { get; private set; }
+        private List<Container> cargoList = new();
+
+        public Ship(string name, double speed, int maxContainers)
+        {
+            ShipName = name;
+            MaxSpeed = speed;
+            MaxContainers = maxContainers;
+        }
+
+        public void LoadContainer(Container cont)
+        {
+            if (cargoList.Count >= MaxContainers)
+                throw new InvalidOperationException("Ship is full!");
+            cargoList.Add(cont);
+        }
+
+        public void LoadList(List<Container> list)
+        {
+            foreach (var c in list)
+                LoadContainer(c);
+        }
+
+        public void RemoveContainer(string serial)
+        {
+            cargoList.RemoveAll(c => c.sNumber == serial);
+        }
+
+        public void ReplaceContainer(string serial, Container newC)
+        {
+            RemoveContainer(serial);
+            LoadContainer(newC);
+        }
+
+        public void Transfer(string serial, Ship otherShip)
+        {
+            var cont = cargoList.FirstOrDefault(c => c.sNumber == serial);
+            if (cont != null)
+            {
+                otherShip.LoadContainer(cont);
+                RemoveContainer(serial);
+            }
+        }
+
+        public double TotalWeight() => cargoList.Sum(c => c.CargoMass + c.TareWeight);
+    }
+}
+
