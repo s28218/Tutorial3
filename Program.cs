@@ -1,11 +1,4 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-Console.WriteLine("Hello");
-
-public class HazardExc : Exception
+﻿public class HazardExc : Exception
 {
     public HazardExc(string message) : base(message) { }
 }
@@ -178,6 +171,57 @@ public class Refrigirator : Container
         }
 
         public double TotalWeight() => cargoList.Sum(c => c.CargoMass + c.TareWeight);
+        
+        public void Info()
+        {
+            Console.WriteLine($"\nShip {ShipName} Speed: {MaxSpeed} knots");
+            Console.WriteLine($"Containers: {cargoList.Count}");
+            Console.WriteLine($"Total Weight: {TotalWeight() / 1000} tons");
+            foreach (var c in cargoList) Console.WriteLine(c);
+        }
     }
-}
+    
+    public static void Main()
+    {
+        Ship ship = new Ship("MadagaskarCargo", 25, 5);
+        
+        Liquid liquid1 = new Liquid(10, 10, 10000, 5000, true);
+        Liquid liquid2 = new Liquid(12, 12, 12000, 6000, false);
+        Gas gas1 = new Gas(15, 10, 8000, 3000, 150);
+        Refrigirator fridge1 = new Refrigirator(10, 10, 5000, 2000, "Meat", -13);
+        
+        Console.WriteLine("Container Info:");
+        Console.WriteLine(liquid1);
+        Console.WriteLine(liquid2);
+        Console.WriteLine(gas1);
+        Console.WriteLine(fridge1);
+        Console.WriteLine();
 
+        try
+        {
+            Console.WriteLine("Loading Containers");
+
+            ship.LoadContainer(liquid1);
+            ship.LoadContainer(liquid2);
+            ship.LoadContainer(gas1);
+            ship.LoadContainer(fridge1);
+
+            ship.Info();
+
+            Console.WriteLine("\nHazard in Liquid 1");
+
+            liquid1.LoadCargo(5500); 
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        
+        Console.WriteLine("\nUpdated Container Info After Loading");
+        Console.WriteLine(liquid1);
+        Console.WriteLine(liquid2);
+        Console.WriteLine(gas1);
+        Console.WriteLine(fridge1);
+    }
+
+}
