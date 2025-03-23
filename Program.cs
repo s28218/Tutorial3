@@ -55,3 +55,45 @@ public abstract class Container
         $"{sNumber}: CargoMass={CargoMass}kg, MaxPayLoad={MaxPayLoad}kg";
 }
 
+public class Liquid : Container, IHazardExc
+{
+    public bool IsHazardous { get; private set; }
+
+    public Liquid(double depth, double height, double maxPayload, double tare, bool isHazard)
+        : base(depth, height, maxPayload, "L", tare)
+    {
+        IsHazardous = isHazard;
+    }
+
+    public override void LoadCargo(double mass)
+    {
+        double limit = IsHazardous ? MaxPayLoad * 0.5 : MaxPayLoad * 0.9;
+        if (mass > limit)
+        {
+            Hazard($"Dangerous overfill {sNumber}");
+            throw new HazardExc("Hazard overload!");
+        }
+        base.LoadCargo(mass);
+    }
+
+    public void Hazard(string message) => Console.WriteLine($"[Hazard Alert] {message}");
+}
+
+public class Gas : Container, IHazardExc
+{
+    public double Pressure { get; private set; }
+
+    public Gas(double depth, double height, double maxPayload, double tare, double pressure)
+        : base(depth, height, maxPayload, "G", tare)
+    {
+        Pressure = pressure;
+    }
+
+    public override void Empty()
+    {
+        CargoMass *= 0.05;
+    }
+
+    public void Hazard(string message) => Console.WriteLine($"[Hazard Alert] {message}");
+}
+
